@@ -46,20 +46,20 @@ const server = http.createServer(async (req, res) => {
     setSecurityHeaders(res);
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
 
-    if (req.method === 'POST' && url.pathname === '/login') return handleLogin(req, res);
-    if (req.method === 'POST' && url.pathname === '/logout') return withAuth(req, res, handleLogout);
-    if (req.method === 'GET' && url.pathname === '/api/session') return withAuth(req, res, handleSession);
-    if (req.method === 'GET' && url.pathname === '/api/users') return withAuth(req, res, () => handleUsers(req, res, url));
+    if (req.method === 'POST' && url.pathname === '/login') return await handleLogin(req, res);
+    if (req.method === 'POST' && url.pathname === '/logout') return await withAuth(req, res, handleLogout);
+    if (req.method === 'GET' && url.pathname === '/api/session') return await withAuth(req, res, handleSession);
+    if (req.method === 'GET' && url.pathname === '/api/users') return await withAuth(req, res, () => handleUsers(req, res, url));
     if (req.method === 'GET' && /^\/api\/users\/[^/]+\/conversations$/.test(url.pathname)) {
-      return withAuth(req, res, () => handleUserConversations(req, res, url));
+      return await withAuth(req, res, () => handleUserConversations(req, res, url));
     }
-    if (req.method === 'GET' && url.pathname === '/api/export.json') return withAuth(req, res, () => handleJsonExport(req, res, url));
-    if (req.method === 'GET' && url.pathname === '/api/export.csv') return withAuth(req, res, () => handleCsvExport(req, res, url));
+    if (req.method === 'GET' && url.pathname === '/api/export.json') return await withAuth(req, res, () => handleJsonExport(req, res, url));
+    if (req.method === 'GET' && url.pathname === '/api/export.csv') return await withAuth(req, res, () => handleCsvExport(req, res, url));
 
     if (req.method === 'GET' || req.method === 'HEAD') return serveStatic(req, res, url.pathname);
     return sendJson(res, 404, { error: 'Not found' });
   } catch (error) {
-    console.error(error);
+    console.error('Request failed:', error);
     return sendJson(res, 500, { error: 'تعذر تنفيذ الطلب. تحقق من إعدادات السيرفر وسجلات التشغيل.' });
   }
 });
@@ -143,7 +143,7 @@ async function fetchConversations(options = {}) {
     params.set('telegram_user_id', `eq.${String(options.telegramUserId)}`);
   }
 
-  const response = await fetch(`${config.supabaseUrl}/rest/v1/telegram_conversations?${params}`, {
+  const response = await fetchWithRetry(`${config.supabaseUrl}/rest/v1/telegram_conversations?${params}`, {
     headers: {
       apikey: config.supabaseKey,
       Authorization: `Bearer ${config.supabaseKey}`,
@@ -157,6 +157,27 @@ async function fetchConversations(options = {}) {
   }
 
   return response.json();
+}
+
+async function fetchWithRetry(url, options) {
+  const delays = [250, 750];
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      return await fetch(url, options);
+    } catch (error) {
+      if (attempt >= delays.length || !isTransientNetworkError(error)) throw error;
+      await sleep(delays[attempt]);
+    }
+  }
+}
+
+function isTransientNetworkError(error) {
+  const code = error?.cause?.code || error?.code;
+  return ['EAI_AGAIN', 'ECONNRESET', 'ETIMEDOUT', 'UND_ERR_CONNECT_TIMEOUT'].includes(code);
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function aggregateUsers(rows) {
