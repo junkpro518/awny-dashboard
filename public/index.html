@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>لوحة محادثات عوني</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main id="loginView" class="login-shell" hidden>
+      <section class="login-panel" aria-labelledby="loginTitle">
+        <div>
+          <p class="eyebrow">Awny Dashboard</p>
+          <h1 id="loginTitle">لوحة محادثات عوني</h1>
+          <p class="login-copy">ادخل بيانات الإدارة لعرض محادثات Telegram المسجلة.</p>
+        </div>
+        <form id="loginForm" class="login-form">
+          <label>
+            اسم المستخدم
+            <input id="usernameInput" name="username" autocomplete="username" required>
+          </label>
+          <label>
+            كلمة المرور
+            <input id="passwordInput" name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button type="submit">دخول</button>
+          <p id="loginError" class="form-error" role="alert"></p>
+        </form>
+      </section>
+    </main>
+
+    <main id="appView" class="app-shell" hidden>
+      <aside class="sidebar" aria-label="المستخدمون">
+        <header class="sidebar-header">
+          <div>
+            <p class="eyebrow">Telegram</p>
+            <h1>المحادثات</h1>
+          </div>
+          <button id="themeToggle" class="icon-button" type="button" title="تبديل الوضع">◐</button>
+        </header>
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="بحث بالاسم أو المعرف أو username">
+        </div>
+        <div class="sidebar-actions">
+          <button id="refreshButton" type="button">تحديث</button>
+          <button id="exportAllJson" type="button">JSON</button>
+          <button id="exportAllCsv" type="button">CSV</button>
+        </div>
+        <section id="userList" class="user-list" aria-live="polite"></section>
+        <footer class="sidebar-footer">
+          <span id="refreshStatus">آخر تحديث: -</span>
+          <button id="logoutButton" type="button">خروج</button>
+        </footer>
+      </aside>
+
+      <section class="conversation">
+        <header class="conversation-header">
+          <button id="mobileUsersButton" class="mobile-users-button" type="button">المستخدمون</button>
+          <div>
+            <h2 id="conversationTitle">اختر مستخدمًا</h2>
+            <p id="conversationSubtitle">ستظهر المحادثة الكاملة هنا.</p>
+          </div>
+          <div class="conversation-tools">
+            <button id="detailsToggle" type="button" disabled>بيانات المستخدم</button>
+            <button id="exportUserJson" type="button" disabled>تصدير JSON</button>
+            <button id="exportUserCsv" type="button" disabled>تصدير CSV</button>
+          </div>
+        </header>
+        <div id="messageList" class="message-list">
+          <div class="empty-state">اختر مستخدمًا من القائمة الجانبية لعرض سجل المحادثة.</div>
+        </div>
+      </section>
+
+      <aside id="detailsPanel" class="details-panel" aria-label="تفاصيل المستخدم">
+        <header>
+          <h2>تفاصيل المستخدم</h2>
+          <button id="closeDetails" class="icon-button" type="button" title="إغلاق" aria-label="إغلاق بيانات المستخدم">×</button>
+        </header>
+        <div id="userDetails" class="details-content">
+          <p class="empty-state">اضغط على اسم المستخدم لعرض التفاصيل.</p>
+        </div>
+      </aside>
+    </main>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

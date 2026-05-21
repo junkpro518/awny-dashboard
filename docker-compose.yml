@@ -1,0 +1,25 @@
+services:
+  awny-dashboard:
+    build: .
+    image: awny-dashboard:latest
+    container_name: awny-dashboard
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      COOKIE_SECURE: "true"
+    networks:
+      - proxy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.awny-dashboard.rule=Host(`${DOMAIN}`)
+      - traefik.http.routers.awny-dashboard.entrypoints=websecure
+      - traefik.http.routers.awny-dashboard.tls.certresolver=myresolver
+      - traefik.http.services.awny-dashboard.loadbalancer.server.port=3000
+
+networks:
+  proxy:
+    external: true
