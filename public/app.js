@@ -3,7 +3,7 @@ const state = {
   selectedUserId: null,
   selectedUser: null,
   conversations: [],
-  detailsClosed: false,
+  detailsClosed: true,
   refreshTimer: null,
   searchTimer: null
 };
@@ -234,7 +234,13 @@ function renderDetails() {
       ${detailItem('آخر رسالة', user.latest_message || '-')}
     </div>
   `;
-  els.detailsPanel.classList.add('open');
+  if (state.detailsClosed) {
+    els.appView.classList.add('details-closed');
+    els.detailsPanel.classList.remove('open');
+  } else {
+    els.appView.classList.remove('details-closed');
+    els.detailsPanel.classList.add('open');
+  }
 }
 
 function renderEmptyConversation() {
@@ -270,6 +276,9 @@ function detailItem(label, value) {
 }
 
 function showLogin() {
+  state.detailsClosed = true;
+  els.appView.classList.add('details-closed');
+  els.detailsPanel.classList.remove('open');
   els.loginView.hidden = false;
   els.appView.hidden = true;
   els.usernameInput.focus();
@@ -278,6 +287,10 @@ function showLogin() {
 function showApp() {
   els.loginView.hidden = true;
   els.appView.hidden = false;
+  if (state.detailsClosed) {
+    els.appView.classList.add('details-closed');
+    els.detailsPanel.classList.remove('open');
+  }
 }
 
 function startAutoRefresh() {
